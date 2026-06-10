@@ -15,6 +15,7 @@
 
 ### Structure & Anti-Patterns
 - Do NOT use C# top-level statements for program entry points. Always use the classic structure with an explicit `Program` class and a `static void Main(string[] args)` method.
+- Do NOT use C# 12 primary constructors. Always use explicit constructor declarations with `this.` field assignments.
 
 ### Code Style & `this.`
 - Explicitly use the `this.` qualifier for all access to instance fields, properties, and methods within a class.
@@ -29,6 +30,14 @@
 - Private fields must use standard camelCase, for example: `private ILogger logger;`
 - Follow PascalCase for classes, records, structs, interfaces, methods, and public members.
 - Prefix interfaces with `I`, for example: `IUserService`.
+
+### Type Safety & Explicit Typing
+- ALWAYS use explicit types for variables, parameters, and return values. NEVER use `var`.
+- Use explicit return types for all methods: `private string GetName() { ... }`, not `private var GetName() { ... }`
+- Use explicit parameter types: `private void ProcessData(string data, int count) { ... }`
+- Declare field types explicitly: `private ILogger logger;`, not `private var logger;`
+- Use explicit generic types: `private List<User> users = new List<User>();`, not `private var users = new { ... };`
+- Use explicit collection initializers: `private Dictionary<string, int> mapping = new Dictionary<string, int> { ... };`
 
 ### XML Documentation Standards
 - Every interface, public class, method, and property MUST include precise C# XML documentation using `/// <summary>`.
@@ -47,6 +56,20 @@ public interface INetworkConfigService
     /// <param name="ipAddress">IP address to set.</param>
     /// <returns>True if successful; otherwise, false.</returns>
     Task<bool> ChangeIpAddressAsync(string interfaceName, string ipAddress);
+}
+```
+
+### Constructor Example with Explicit Types
+```csharp
+/// <summary>
+/// Initializes a new instance of the <see cref="CommandDispatcher"/> class.
+/// </summary>
+/// <param name="commands">The collection of available commands.</param>
+/// <param name="logger">The logger instance.</param>
+public CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatcher> logger)
+{
+    this.commands = commands;
+    this.logger = logger;
 }
 ```
 
