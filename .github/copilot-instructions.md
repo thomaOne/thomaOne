@@ -13,6 +13,12 @@
 
 ## C# & .NET Coding Standards
 
+## Cross-Language Boundaries
+- For mixed-language projects (for example, C# + TypeScript), apply each language's style rules only to source files written in that language.
+- For auto-generated cross-language boundary files (for example, OpenAPI-generated TypeScript clients from a C# API), do not manually refactor for style conformance.
+- Place generated files in a `generated/` folder whenever possible.
+- Exclude generated files from linting and formatting checks.
+
 ### Structure & Anti-Patterns
 - Do NOT use C# top-level statements for program entry points. Always use the classic structure with an explicit `Program` class and a `static void Main(string[] args)` method.
 
