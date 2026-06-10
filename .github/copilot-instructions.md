@@ -15,7 +15,6 @@
 
 ### Structure & Anti-Patterns
 - Do NOT use C# top-level statements for program entry points. Always use the classic structure with an explicit `Program` class and a `static void Main(string[] args)` method.
-- Do NOT use C# 12 primary constructors. Always use explicit constructor declarations with `this.` field assignments.
 
 ### Code Style & `this.`
 - Explicitly use the `this.` qualifier for all access to instance fields, properties, and methods within a class.
@@ -39,6 +38,44 @@
 - Use explicit generic types: `private List<User> users = new List<User>();`, not `private var users = new { ... };`
 - Use explicit collection initializers: `private Dictionary<string, int> mapping = new Dictionary<string, int> { ... };`
 
+### Constructor Patterns
+- Use either **standard constructors** or **primary constructors** (both are acceptable).
+- For **standard constructors**: Assign parameters to private fields using `this.` qualifier.
+- For **primary constructors**: Store parameters in private fields before use. Use `this.` qualifier to access them.
+- Always provide XML documentation for constructors and their parameters.
+
+**Standard Constructor Example:**
+```csharp
+/// <summary>
+/// Initializes a new instance of the <see cref="CommandDispatcher"/> class.
+/// </summary>
+/// <param name="commands">The collection of available commands.</param>
+/// <param name="logger">The logger instance.</param>
+public CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatcher> logger)
+{
+    this.commands = commands;
+    this.logger = logger;
+}
+```
+
+**Primary Constructor Example (also acceptable):**
+```csharp
+/// <summary>
+/// Service that dispatches commands to registered handlers.
+/// </summary>
+public class CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatcher> logger)
+    : ICommandDispatcher
+{
+    /// <inheritdoc/>
+    public async Task<string> DispatchAsync(string rawCommand)
+    {
+        ICommand command = this.commands.FirstOrDefault(c => c.CommandName == commandName);
+        this.logger.LogInformation("Executing command: {CommandName}", commandName);
+        return await command.ExecuteAsync(args);
+    }
+}
+```
+
 ### XML Documentation Standards
 - Every interface, public class, method, and property MUST include precise C# XML documentation using `/// <summary>`.
 - Use this format:
@@ -56,20 +93,6 @@ public interface INetworkConfigService
     /// <param name="ipAddress">IP address to set.</param>
     /// <returns>True if successful; otherwise, false.</returns>
     Task<bool> ChangeIpAddressAsync(string interfaceName, string ipAddress);
-}
-```
-
-### Constructor Example with Explicit Types
-```csharp
-/// <summary>
-/// Initializes a new instance of the <see cref="CommandDispatcher"/> class.
-/// </summary>
-/// <param name="commands">The collection of available commands.</param>
-/// <param name="logger">The logger instance.</param>
-public CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatcher> logger)
-{
-    this.commands = commands;
-    this.logger = logger;
 }
 ```
 
