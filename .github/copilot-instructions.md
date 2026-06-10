@@ -21,8 +21,8 @@
 - Use file-scoped namespaces (`namespace MyNamespace;`) where appropriate.
 - Use pattern matching and switch expressions wherever possible.
 - Always use explicit access modifiers such as `private`, `public`, and `internal`.
-- Use 4 spaces for indentation. Do not use tabs.
-- Opening braces `{` must be on a new line.
+- **For C# only:** Use 4 spaces for indentation. Do not use tabs.
+- **For C# only:** Opening braces `{` must be on a new line (Allman style).
 
 ### Naming Conventions & Fields
 - Do NOT use an underscore prefix (`_`) for private fields.
@@ -40,11 +40,11 @@
 
 ### Constructor Patterns
 - Use either **standard constructors** or **primary constructors** (both are acceptable).
-- For **standard constructors**: Assign parameters to private fields using `this.` qualifier.
-- For **primary constructors**: Store parameters in private fields before use. Use `this.` qualifier to access them.
-- Always provide XML documentation for constructors and their parameters.
 
-**Standard Constructor Example:**
+**Standard Constructor Pattern (traditional approach):**
+- Assign constructor parameters to private fields using `this.` qualifier.
+- Provide XML documentation for constructors and their parameters.
+
 ```csharp
 /// <summary>
 /// Initializes a new instance of the <see cref="CommandDispatcher"/> class.
@@ -58,20 +58,42 @@ public CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatch
 }
 ```
 
-**Primary Constructor Example (also acceptable):**
+**Primary Constructor Pattern (C# 12+, modern approach):**
+- Use primary constructor parameters directly without declaring private backing fields.
+- Access parameters via `this.` qualifier within the class body.
+- In C# 12+, primary constructor parameters are accessible throughout the class lifetime.
+- Provide XML documentation for the class and its primary constructor parameters.
+
 ```csharp
 /// <summary>
 /// Service that dispatches commands to registered handlers.
 /// </summary>
+/// <param name="commands">The collection of available commands.</param>
+/// <param name="logger">The logger instance.</param>
 public class CommandDispatcher(IEnumerable<ICommand> commands, ILogger<CommandDispatcher> logger)
     : ICommandDispatcher
 {
     /// <inheritdoc/>
     public async Task<string> DispatchAsync(string rawCommand)
     {
-        ICommand command = this.commands.FirstOrDefault(c => c.CommandName == commandName);
-        this.logger.LogInformation("Executing command: {CommandName}", commandName);
-        return await command.ExecuteAsync(args);
+        ICommand? command = this.commands.FirstOrDefault(c => c.CommandName == commandName);
+
+        if (command == null)
+        {
+            this.logger.LogWarning("Unknown command: {CommandName}", commandName);
+            return $"ERROR: Unknown command '{commandName}'";
+        }
+
+        try
+        {
+            this.logger.LogInformation("Executing command: {CommandName}", commandName);
+            return await command.ExecuteAsync(args);
+        }
+        catch (Exception ex)
+        {
+            this.logger.LogError(ex, "Error executing command: {CommandName}", commandName);
+            return "ERROR: Command execution failed";
+        }
     }
 }
 ```
@@ -159,11 +181,11 @@ export default class UserService extends Vue {
 - Avoid default exports for utility functions; use named exports.
 
 ### Code Style & Formatting
-- Use 2 spaces for indentation (Vue.js convention).
+- **For TypeScript only:** Use 2 spaces for indentation (Vue.js convention).
 - Use single quotes for strings: `const name = 'John';`
 - Use trailing commas in multiline objects/arrays.
 - Use `const` by default, `let` when reassignment is needed. Never use `var`.
-- Opening braces `{` stay on the same line.
+- **For TypeScript only:** Opening braces `{` stay on the same line (K&R style).
 
 ### Linting & Formatting
 - Format with **Prettier** (2-space indentation).
